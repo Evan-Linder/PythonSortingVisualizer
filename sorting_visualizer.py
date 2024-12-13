@@ -1,5 +1,6 @@
 import pygame
 import random
+from sorting_methods import *
 
 pygame.init()
 
@@ -36,20 +37,31 @@ dropdown_open = False
 sorting_methods = ["Bubble Sort", "Merge Sort", "Quick Sort", "Insertion Sort"]
 selected_method = "Select Sorting Method"
 
+# sorting button
+sort_button = pygame.Rect(WIDTH - 120, 20, 100, 40)
+
+# delay when sorting
+sorting_delay = 0.2
+
 
 # function to render the bars
-def draw_bars(screen, bar_heights, screen_width, screen_height, color):
+def draw_bars(screen, bar_heights, screen_width, screen_height, color, highlight = None, swap = False):
     bar_width = 20  
     spacing = 10  # Spacing between bars
 
     for i, bar_height in enumerate(bar_heights):
 
+        # color for current bar
+        if highlight and i in highlight:
+            bar_color = RED if swap else GREEN
+        else:
+            bar_color = color   
         # Calculate x and y for each bar
         x = (screen_width - (len(bar_heights) * (bar_width + spacing))) // 2 + i * (bar_width + spacing)
         y = screen_height - bar_height  
 
         # Draw the bar
-        pygame.draw.rect(screen, color, (x, y, bar_width, bar_height))
+        pygame.draw.rect(screen, bar_color, (x, y, bar_width, bar_height))
 
 
 # function to draw the bar input field
@@ -92,7 +104,14 @@ def draw_dropdown(screen, font, dropdown_box, dropdown_open, sorting_methods, se
             text_surface = font.render(method, True, BLACK)
             screen.blit(text_surface, (option_box.x + 10, option_box.y + 10))
 
-        
+
+# function to draw the sort button
+def draw_sort_button(screen, font, sort_button):
+    pygame.draw.rect(screen, WHITE, sort_button, border_radius = 5)
+    pygame.draw.rect(screen, BLACK, sort_button, 2 , border_radius = 5)
+    text_surface = font.render("Sort", True, BLACK)
+    text_rect = text_surface.get_rect(center = sort_button.center)
+    screen.blit(text_surface, text_rect)
 
 
 running = True
@@ -109,6 +128,7 @@ while running:
             else:
                 input_active = False
 
+            # check if user clicked the dropdown
             mouse_pos = event.pos
             if dropdown_box.collidepoint(mouse_pos):
                 dropdown_open = not dropdown_open
@@ -120,7 +140,14 @@ while running:
                     if option_box.collidepoint(mouse_pos):
                         selected_method = method
                         dropdown_open = False
-                                             
+
+            # check if user clicks the sort button
+            if sort_button.collidepoint(mouse_pos):
+                if selected_method == "Bubble Sort":
+                    bubble_sort(screen, bar_heights, BLUE, WHITE, sorting_delay, draw_bars)
+                elif selected_method == "Merge Sort":
+                    merge_sort(screen, bar_heights, BLUE, WHITE, sorting_delay, draw_bars)
+                                                   
                 
 
 
@@ -133,7 +160,6 @@ while running:
                 
                 # use a try/catch to ensure input is within range
                     try:
-
                         num_bars = int(input_text)
                         if 1 <= num_bars <= 30:
                             message = "Bar amount: " + input_text
@@ -161,6 +187,7 @@ while running:
     draw_bar_input(screen, input_box, input_text, font, input_active)
     draw_message_box(screen, message, font, message_color)
     draw_dropdown(screen, font, dropdown_box, dropdown_open, sorting_methods, selected_method)
+    draw_sort_button(screen, font, sort_button)
 
     pygame.display.flip()
 
