@@ -30,6 +30,12 @@ input_active = False
 message = "Bar amount: 30"
 message_color = BLACK
 
+# drop down menu
+dropdown_box = pygame.Rect(20,20,285,40)
+dropdown_open = False
+sorting_methods = ["Bubble Sort", "Merge Sort", "Quick Sort", "Insertion Sort"]
+selected_method = "Select Sorting Method"
+
 
 # function to render the bars
 def draw_bars(screen, bar_heights, screen_width, screen_height, color):
@@ -67,6 +73,28 @@ def draw_message_box(screen, message, font, color):
 
         screen.blit(text_surface, (message_box.x + 5, message_box.y + 5))
 
+# function to draw the dropdown menu
+def draw_dropdown(screen, font, dropdown_box, dropdown_open, sorting_methods, selected_method):
+
+    # draw main dropdown box
+    pygame.draw.rect(screen, WHITE, dropdown_box, border_radius = 5)
+    pygame.draw.rect(screen, BLACK, dropdown_box, 2, border_radius = 5)
+    text_surface = font.render(selected_method, True, BLACK)
+    screen.blit(text_surface, (dropdown_box.x + 10, dropdown_box.y + 10))
+
+    # display options if dropdown menu is open
+    if dropdown_open:
+        option_box_height = dropdown_box.height
+        for i, method in enumerate(sorting_methods):
+            option_box = pygame.Rect(dropdown_box.x, dropdown_box.y + (i + 1) * option_box_height, dropdown_box.width, dropdown_box.height)
+            pygame.draw.rect(screen, WHITE, option_box, border_radius = 5)   
+            pygame.draw.rect(screen, BLACK, option_box, 2, border_radius = 5)   
+            text_surface = font.render(method, True, BLACK)
+            screen.blit(text_surface, (option_box.x + 10, option_box.y + 10))
+
+        
+
+
 running = True
 while running:
     for event in pygame.event.get():
@@ -80,6 +108,21 @@ while running:
                 input_active = not input_active
             else:
                 input_active = False
+
+            mouse_pos = event.pos
+            if dropdown_box.collidepoint(mouse_pos):
+                dropdown_open = not dropdown_open
+            
+            if dropdown_open:
+                for i, method in enumerate(sorting_methods):
+                    option_box = pygame.Rect(dropdown_box.x, dropdown_box.y + (i + 1) * dropdown_box.height, dropdown_box.width, dropdown_box.height)
+                    
+                    if option_box.collidepoint(mouse_pos):
+                        selected_method = method
+                        dropdown_open = False
+                                             
+                
+
 
         # check for key presses
         elif event.type == pygame.KEYDOWN:
@@ -117,7 +160,8 @@ while running:
     draw_bars(screen, bar_heights, WIDTH, HEIGHT, BLUE)
     draw_bar_input(screen, input_box, input_text, font, input_active)
     draw_message_box(screen, message, font, message_color)
-    
+    draw_dropdown(screen, font, dropdown_box, dropdown_open, sorting_methods, selected_method)
+
     pygame.display.flip()
 
 pygame.quit()
